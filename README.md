@@ -1,1 +1,48 @@
-# fivem-tag-bot
+[bot.js](https://github.com/user-attachments/files/28772173/bot.js)
+# fivem-tag-botconst { Client, GatewayIntentBits } = require('discord.js');
+const axios = require('axios');
+
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds]
+});
+
+client.on('ready', () => {
+  console.log('Bot aktif');
+});
+
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === 'tag') {
+
+    const tag = interaction.options.getString('tag');
+
+    try {
+
+      const res = await axios.get(
+        'http://45.15.41.227:30120/players.json'
+      );
+
+      const players = res.data;
+
+      const found = players.filter(x =>
+        x.name.toLowerCase().includes(
+          tag.toLowerCase()
+        )
+      );
+
+      await interaction.reply(
+        `${tag} tagında ${found.length} kişi bulundu`
+      );
+
+    } catch {
+
+      await interaction.reply(
+        'Oyuncu listesine ulaşılamadı'
+      );
+
+    }
+  }
+});
+
+client.login(process.env.TOKEN);
